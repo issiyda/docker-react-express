@@ -3,12 +3,10 @@ services:
   db:
     image: mysql
     environment:
-      - MYSQL_ROOT_HOST=${DB_ROOT_HOST}
-      - MYSQL_DATABASE=${DB_NAME}
-      - MYSQL_USER=${DB_USER}
-      - MYSQL_PASSWORD=${DB_PASS}
-      - MYSQL_ROOT_PASSWORD=${DB_PASS}
-      - TZ=${TZ}
+      MYSQL_USER: test
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: root
+      TZ: "Asia/Tokyo"
     ports:
       - '3306:3306'
     volumes:
@@ -16,18 +14,17 @@ services:
       - mysql_data:/var/lib/mysql
       - ./db/logs:/var/log/mysql
     networks:
-      backend:
-        ipv4_address: 172.28.1.5
+      - backend
 
   api:
     image: node
-    environment:
-      - MYSQL_SERVER=db
-      - MYSQL_USER=${DB_USER}
-      - MYSQL_PASSWORD=${DB_PASS}
-      - MYSQL_DATABASE=${DB_NAME}
-      - TZ=${TZ}
-      - CHOKIDAR_USEPOLLING=true
+    # environment:
+    #   - MYSQL_SERVER=db
+    #   - MYSQL_USER=${DB_USER}
+    #   - MYSQL_PASSWORD=${DB_PASS}
+    #   - MYSQL_DATABASE=${DB_NAME}
+    #   - TZ=${TZ}
+    #   - CHOKIDAR_USEPOLLING=true
     tty: true
     ports:
       - '3000:3000'
@@ -36,8 +33,7 @@ services:
     working_dir: /app
     command: yarn run dev
     networks:
-      backend:
-        ipv4_address: 172.28.1.10
+      - backend
     depends_on:
       - db
 
@@ -59,11 +55,9 @@ services:
 
 networks:
   backend:
-    driver: bridge
     name: app_network
-    ipam:
-      config:
-        - subnet: 172.28.1.0/24
+    driver: bridge
+    external: true
 
 volumes:
   mysql_data:
